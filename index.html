@@ -2,7 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0f19">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>礼品中心 - 礼品选择与营销宣传图智能工坊</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,10 +30,6 @@
                             400: '#fbbf24',
                             500: '#d4af37',
                             600: '#b48a1c',
-                        },
-                        biz: {
-                            800: '#111827',
-                            900: '#090d16',
                         }
                     }
                 }
@@ -39,56 +38,81 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #0b0f19;
             color: #f1f5f9;
+            -webkit-overflow-scrolling: touch;
         }
-        /* Custom scrollbar */
+
+        /* 解决移动端输入框小于16px自动放大画面的问题 */
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+        @media (min-width: 768px) {
+            input, select, textarea {
+                font-size: 14px !important;
+            }
+        }
+
+        /* 自定义滚动条 */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: #111827;
+            background: #0f172a;
         }
         ::-webkit-scrollbar-thumb {
-            background: #374151;
+            background: #334155;
             border-radius: 4px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4b5563;
-        }
+
         .glass-panel {
-            background: rgba(17, 24, 39, 0.75);
+            background: rgba(17, 24, 39, 0.82);
             backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .poster-card-preview:hover .poster-overlay {
-            opacity: 1;
+
+        /* 底部安全区兼容 iPhone X 及以上 */
+        .safe-bottom {
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+        }
+
+        .main-container-pad {
+            padding-bottom: max(6.5rem, calc(5rem + env(safe-area-inset-bottom)));
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-rose-500 selection:text-white">
 
-    <!-- 顶部导航栏 -->
+    <!-- 顶部导航栏 (移动端紧凑友好，桌面端全功能) -->
     <header class="sticky top-0 z-40 glass-panel border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-900/30">
-                    <i data-lucide="gift" class="w-5 h-5 text-white"></i>
+        <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+            
+            <!-- 品牌 Logo 与标题 -->
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-900/30 flex-shrink-0">
+                    <i data-lucide="gift" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
                 </div>
                 <div>
-                    <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                        礼品综合工坊
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">商务 & 活力</span>
-                    </span>
-                    <p class="text-xs text-slate-400">礼品库管理与多风格宣传图一键生成</p>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-base sm:text-lg font-bold tracking-tight text-white">礼品工坊</span>
+                        <span class="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 font-medium">商务·活力</span>
+                    </div>
+                    <p class="hidden sm:block text-xs text-slate-400">礼品库管理与多风格宣传图一键生成</p>
                 </div>
             </div>
 
-            <!-- 功能选项卡切换 -->
-            <nav class="flex items-center bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
+            <!-- 桌面端居中选项卡切换 (移动端改在底部吸底导航) -->
+            <nav class="hidden md:flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
                 <button id="tab-btn-catalog" onclick="switchTab('catalog')" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-rose-600 text-white shadow-sm">
                     <i data-lucide="package" class="w-4 h-4"></i>
                     <span>礼品挑选与管理</span>
@@ -101,61 +125,66 @@
                 </button>
             </nav>
 
-            <!-- 右侧快捷按钮 -->
-            <div class="flex items-center space-x-3">
-                <button onclick="openCartDrawer()" class="relative p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition" title="查看已选礼品清单">
-                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-                    <span id="floating-cart-count" class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-xs font-black w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-slate-900">0</span>
+            <!-- 右侧快捷操作按钮 -->
+            <div class="flex items-center space-x-2">
+                <button onclick="openCartDrawer()" class="relative p-2 sm:p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition active:scale-95" title="查看已选礼品清单">
+                    <i data-lucide="shopping-bag" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    <span id="floating-cart-count" class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-[10px] sm:text-xs font-black w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ring-2 ring-slate-900">0</span>
                 </button>
-                <button onclick="openAddGiftModal()" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-md transition">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    <span>新增礼品</span>
+                <button onclick="openAddGiftModal()" class="flex items-center space-x-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs sm:text-sm shadow-md transition active:scale-95">
+                    <i data-lucide="plus" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                    <span class="inline">新增礼品</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- 主体内容区域 -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- 主体内容区域 (增加移动端底部避让距离) -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 main-container-pad">
 
         <!-- ============================================== -->
         <!-- 模块一：礼品挑选与管理 (Gift Catalog & Selection) -->
         <!-- ============================================== -->
-        <section id="section-catalog" class="space-y-6">
-            <!-- 顶栏状态与筛选 -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl glass-panel">
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="relative min-w-[260px]">
+        <section id="section-catalog" class="space-y-4 sm:space-y-6">
+            
+            <!-- 检索、分类与汇总栏 -->
+            <div class="p-3.5 sm:p-5 rounded-2xl glass-panel space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3">
+                    <div class="sm:col-span-8 relative">
                         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
                         <input id="catalog-search" type="text" placeholder="搜索礼品名称、标签或描述..." oninput="renderCatalog()"
-                               class="w-full pl-10 pr-4 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-rose-500 transition">
+                               class="w-full pl-10 pr-4 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-rose-500 transition">
                     </div>
-                    <select id="catalog-filter-category" onchange="renderCatalog()" class="px-3.5 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-slate-300 focus:outline-none focus:border-rose-500">
-                        <option value="ALL">全部分类</option>
-                        <option value="商务办公">商务办公</option>
-                        <option value="数码科技">数码科技</option>
-                        <option value="茗茶滋补">茗茶滋补</option>
-                        <option value="生鲜果礼">生鲜果礼</option>
-                    </select>
+                    <div class="sm:col-span-4">
+                        <select id="catalog-filter-category" onchange="renderCatalog()" class="w-full px-3 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-slate-300 focus:outline-none focus:border-rose-500">
+                            <option value="ALL">全部分类 (全部礼品)</option>
+                            <option value="商务办公">商务办公</option>
+                            <option value="数码科技">数码科技</option>
+                            <option value="茗茶滋补">茗茶滋补</option>
+                            <option value="生鲜果礼">生鲜果礼</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
                     <div class="text-xs text-slate-400">
-                        共 <span id="catalog-total-count" class="font-bold text-amber-400">6</span> 件礼品，已选 <span id="catalog-selected-count" class="font-bold text-rose-400">0</span> 种
+                        共 <span id="catalog-total-count" class="font-bold text-amber-400">6</span> 款，已选 <span id="catalog-selected-count" class="font-bold text-rose-400">0</span> 款
                     </div>
-                    <button onclick="resetDefaultData()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg border border-slate-700/50 transition flex items-center gap-1">
-                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                        <span>恢复预设</span>
-                    </button>
-                    <button onclick="openCartDrawer()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-200 flex items-center space-x-1.5 transition">
-                        <i data-lucide="list-ordered" class="w-4 h-4 text-amber-400"></i>
-                        <span>管理选择清单</span>
-                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="resetDefaultData()" class="px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg border border-slate-700/50 transition flex items-center gap-1 active:scale-95">
+                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                            <span>恢复预设</span>
+                        </button>
+                        <button onclick="openCartDrawer()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 flex items-center space-x-1 transition active:scale-95">
+                            <i data-lucide="list-ordered" class="w-3.5 h-3.5 text-amber-400"></i>
+                            <span>清单明细</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- 礼品网格展示列表 -->
-            <div id="gifts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 礼品网格展示列表 (手机端单列极佳排版，平板双列，电脑三列) -->
+            <div id="gifts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
                 <!-- 动态渲染礼品卡片 -->
             </div>
         </section>
@@ -164,19 +193,33 @@
         <!-- ============================================== -->
         <!-- 模块二：宣传图生成器 (Poster Generation Studio) -->
         <!-- ============================================== -->
-        <section id="section-poster" class="space-y-8 hidden">
+        <section id="section-poster" class="space-y-4 sm:space-y-8 hidden">
+            
+            <!-- 移动端顶部快捷锚点切换 -->
+            <div class="flex md:hidden items-center justify-between p-2.5 rounded-xl glass-panel text-xs">
+                <span class="text-slate-400 font-medium">手机端快捷跳转：</span>
+                <div class="flex items-center space-x-2">
+                    <button onclick="scrollToElement('poster-form-card')" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-200 border border-slate-700">
+                        ⚙️ 修改参数
+                    </button>
+                    <button onclick="scrollToElement('posters-gallery-section')" class="px-2.5 py-1 rounded-lg bg-rose-600/30 text-rose-300 border border-rose-500/40 font-bold">
+                        🖼️ 查看8款海报 ⬇️
+                    </button>
+                </div>
+            </div>
+
             <!-- 宣传图生成控制面板 -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
                 
                 <!-- 左侧表单参数调节 (4 Cols) -->
-                <div class="lg:col-span-4 space-y-6">
-                    <div class="p-6 rounded-2xl glass-panel space-y-5">
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                            <h2 class="text-base font-bold text-white flex items-center gap-2">
-                                <i data-lucide="sliders" class="w-5 h-5 text-rose-500"></i>
+                <div class="lg:col-span-4 space-y-4" id="poster-form-card">
+                    <div class="p-4 sm:p-6 rounded-2xl glass-panel space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                                <i data-lucide="sliders" class="w-4 h-4 sm:w-5 sm:h-5 text-rose-500"></i>
                                 宣传图参数设定
                             </h2>
-                            <button onclick="populateFormFromPreset()" class="text-xs text-amber-400 hover:underline flex items-center gap-1">
+                            <button onclick="populateFormFromPreset()" class="text-xs text-amber-400 hover:underline flex items-center gap-1 active:scale-95">
                                 <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
                                 填入示例
                             </button>
@@ -184,103 +227,102 @@
 
                         <!-- 快速从礼品库选择 -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">从现有礼品库一键载入</label>
-                            <select id="poster-gift-select" onchange="onSelectGiftForPoster(this.value)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">从已有礼品库一键载入</label>
+                            <select id="poster-gift-select" onchange="onSelectGiftForPoster(this.value)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                                 <option value="">-- 选择已有礼品自动填充 --</option>
                             </select>
                         </div>
 
                         <!-- 礼品主标题 -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">礼品主名称 (Headline) *</label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">礼品主名称 (Headline) *</label>
                             <input id="poster-title" type="text" placeholder="例如：商务高端定制保温杯礼盒" value="商务高端定制保温杯礼盒"
-                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                         </div>
 
                         <!-- 宣传标语 / 副标题 -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">宣传标语 / 副标题 (Slogan)</label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">宣传标语 / 副标题 (Slogan)</label>
                             <input id="poster-slogan" type="text" placeholder="例如：臻选品质生活 · 传递温情心意" value="臻选品质生活 · 传递温情心意"
-                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                         </div>
 
                         <!-- 活动徽章标签 -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">活动徽章 / 卖点标签 (用逗号分隔)</label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">活动徽章 / 卖点标签 (逗号分隔)</label>
                             <input id="poster-tags" type="text" placeholder="商务甄选, VIP定制, 实用轻奢" value="商务甄选, VIP定制, 实用轻奢"
-                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                         </div>
 
                         <!-- 详细描述 -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">详细文案描述 (Description)</label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">详细文案描述 (Description)</label>
                             <textarea id="poster-desc" rows="3" placeholder="输入核心材质、特色、适用场景等..."
-                                      class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500 resize-none">316L医用级不锈钢内胆，智能触显水温，轻奢商务黑金配色，内含定制金尖签字笔，尊崇致礼。</textarea>
+                                      class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500 resize-none">316L医用级不锈钢内胆，智能触显水温，轻奢商务黑金配色，内含定制金尖签字笔，尊崇致礼。</textarea>
                         </div>
 
                         <!-- 专享价格/价值展示 -->
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">专享价格/价值</label>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">专享价格/价值</label>
                                 <input id="poster-price" type="text" placeholder="¥ 299" value="¥ 299"
-                                       class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                                       class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">行动按钮文字</label>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">行动按钮文字</label>
                                 <input id="poster-cta" type="text" placeholder="VIP 专享礼遇 ➔" value="VIP 专享礼遇 ➔"
-                                       class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                                       class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                             </div>
                         </div>
 
                         <!-- 礼品主体图片上传 / 选择 -->
                         <div>
-                            <div class="flex items-center justify-between mb-1.5">
-                                <label class="text-xs font-semibold text-slate-300">礼品配图 (可选，无图将自动生成文字艺术勋章)</label>
-                                <button type="button" onclick="clearPosterImage()" class="text-xs text-rose-400 hover:underline">清空图片</button>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs font-semibold text-slate-300">礼品配图 (无图将自动转为艺术勋章)</label>
+                                <button type="button" onclick="clearPosterImage()" class="text-xs text-rose-400 hover:underline">清空配图</button>
                             </div>
-                            <div class="flex items-center space-x-3">
-                                <div id="poster-img-preview" class="w-14 h-14 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <div class="flex items-center space-x-2.5">
+                                <div id="poster-img-preview" class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
                                     <img id="poster-img-element" src="./assets/flask.png" class="w-full h-full object-cover">
                                 </div>
                                 <div class="flex-1">
-                                    <label class="cursor-pointer flex items-center justify-center w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-xs text-slate-200 font-medium transition">
-                                        <i data-lucide="upload" class="w-4 h-4 mr-1.5"></i>
+                                    <label class="cursor-pointer flex items-center justify-center w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-xs text-slate-200 font-medium transition active:scale-95">
+                                        <i data-lucide="upload" class="w-3.5 h-3.5 mr-1"></i>
                                         <span>上传本地图片</span>
                                         <input type="file" id="poster-upload-input" accept="image/*" class="hidden" onchange="handlePosterImageUpload(event)">
                                     </label>
-                                    <p class="text-[10px] text-slate-400 mt-1">支持 PNG, JPG, WebP 格式</p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 尺寸比例与风格筛选 -->
-                        <div class="pt-3 border-t border-slate-800 space-y-4">
+                        <div class="pt-3 border-t border-slate-800 space-y-3">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">海报比例与尺寸</label>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <button type="button" onclick="setPosterAspectRatio('9:16')" id="ratio-btn-9-16" class="ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-rose-500 bg-rose-600 text-white text-center">
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">画幅比例选择</label>
+                                <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+                                    <button type="button" onclick="setPosterAspectRatio('9:16')" id="ratio-btn-9-16" class="ratio-btn px-2 py-2 rounded-lg text-xs font-semibold border border-rose-500 bg-rose-600 text-white text-center active:scale-95">
                                         9:16 手机
                                     </button>
-                                    <button type="button" onclick="setPosterAspectRatio('3:4')" id="ratio-btn-3-4" class="ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700">
+                                    <button type="button" onclick="setPosterAspectRatio('3:4')" id="ratio-btn-3-4" class="ratio-btn px-2 py-2 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700 active:scale-95">
                                         3:4 卡片
                                     </button>
-                                    <button type="button" onclick="setPosterAspectRatio('1:1')" id="ratio-btn-1-1" class="ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700">
+                                    <button type="button" onclick="setPosterAspectRatio('1:1')" id="ratio-btn-1-1" class="ratio-btn px-2 py-2 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700 active:scale-95">
                                         1:1 正方
                                     </button>
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">展示风格类别</label>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <button type="button" onclick="setPosterStyleFilter('all')" id="style-btn-all" class="style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-amber-500 bg-amber-600 text-slate-950 text-center font-bold">
-                                        全部风格 (8款)
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">风格筛选</label>
+                                <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+                                    <button type="button" onclick="setPosterStyleFilter('all')" id="style-btn-all" class="style-filter-btn px-2 py-2 rounded-lg text-xs font-bold border border-amber-500 bg-amber-600 text-slate-950 text-center active:scale-95">
+                                        全部 (8款)
                                     </button>
-                                    <button type="button" onclick="setPosterStyleFilter('business')" id="style-btn-business" class="style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700">
-                                        商务专属 (4款)
+                                    <button type="button" onclick="setPosterStyleFilter('business')" id="style-btn-business" class="style-filter-btn px-2 py-2 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700 active:scale-95">
+                                        商务 (4款)
                                     </button>
-                                    <button type="button" onclick="setPosterStyleFilter('vibrant')" id="style-btn-vibrant" class="style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700">
-                                        活力热推 (4款)
+                                    <button type="button" onclick="setPosterStyleFilter('vibrant')" id="style-btn-vibrant" class="style-filter-btn px-2 py-2 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700 active:scale-95">
+                                        活力 (4款)
                                     </button>
                                 </div>
                             </div>
@@ -288,34 +330,34 @@
 
                         <!-- 核心生成触发按钮 -->
                         <div class="pt-2">
-                            <button onclick="generateAllPosters()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-bold text-sm shadow-lg shadow-rose-950/50 flex items-center justify-center space-x-2 transition transform active:scale-95">
+                            <button onclick="generateAllPosters(true)" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-bold text-sm shadow-lg shadow-rose-950/50 flex items-center justify-center space-x-2 transition transform active:scale-95">
                                 <i data-lucide="sparkles" class="w-4 h-4"></i>
-                                <span>立即实时生成多款宣传图</span>
+                                <span>立即生成并查看宣传图</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- 右侧海报画廊挑选与下载 (8 Cols) -->
-                <div class="lg:col-span-8 space-y-6">
-                    <div class="flex items-center justify-between p-4 rounded-2xl glass-panel">
+                <div class="lg:col-span-8 space-y-4" id="posters-gallery-section">
+                    <div class="p-3.5 sm:p-4 rounded-2xl glass-panel flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                            <h2 class="text-base font-bold text-white flex items-center gap-2">
-                                <i data-lucide="layout-grid" class="w-5 h-5 text-amber-400"></i>
+                            <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                                <i data-lucide="layout-grid" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
                                 宣传图挑选与下载区
                             </h2>
-                            <p class="text-xs text-slate-400 mt-0.5">支持在线挑选多款商务、活力高清海报，点击即可放大或直接一键下载</p>
+                            <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">商务与活力设计已生成，点击图片可放大检视</p>
                         </div>
-                        <div class="flex items-center space-x-3">
-                            <button onclick="downloadAllPostersAsZip()" id="btn-batch-download" class="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-amber-300 transition">
-                                <i data-lucide="archive" class="w-4 h-4"></i>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="downloadAllPostersAsZip()" id="btn-batch-download" class="w-full sm:w-auto flex items-center justify-center space-x-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-amber-300 transition active:scale-95">
+                                <i data-lucide="archive" class="w-3.5 h-3.5"></i>
                                 <span>打包下载全套 ZIP</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- 动态生成渲染画廊 -->
-                    <div id="posters-gallery-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                    <div id="posters-gallery-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <!-- 动态填充各类海报卡片 -->
                     </div>
                 </div>
@@ -326,32 +368,65 @@
     </main>
 
     <!-- ============================================== -->
-    <!-- 模态弹窗与抽屉面板 -->
+    <!-- 移动端专属吸底导航栏 (Mobile Bottom Tab Bar) -->
+    <!-- ============================================== -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/90 safe-bottom">
+        <div class="grid grid-cols-3 h-14">
+            <!-- Tab 1: 礼品挑选 -->
+            <button onclick="switchTab('catalog')" id="mob-tab-catalog" class="flex flex-col items-center justify-center text-rose-500 font-bold transition active:scale-95">
+                <div class="relative">
+                    <i data-lucide="package" class="w-5 h-5"></i>
+                    <span id="mob-cart-count" class="absolute -top-1 -right-2.5 bg-amber-500 text-slate-950 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-slate-900">0</span>
+                </div>
+                <span class="text-[11px] mt-0.5">礼品挑选</span>
+            </button>
+
+            <!-- Tab 2: 宣传图生成 -->
+            <button onclick="switchTab('poster')" id="mob-tab-poster" class="flex flex-col items-center justify-center text-slate-400 transition active:scale-95">
+                <div class="relative">
+                    <i data-lucide="wand-sparkles" class="w-5 h-5"></i>
+                    <span class="absolute -top-1 -right-2 bg-emerald-500 w-2 h-2 rounded-full"></span>
+                </div>
+                <span class="text-[11px] mt-0.5">宣传图生成</span>
+            </button>
+
+            <!-- Tab 3: 清单明细 -->
+            <button onclick="openCartDrawer()" class="flex flex-col items-center justify-center text-slate-400 transition active:scale-95">
+                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                <span class="text-[11px] mt-0.5">选礼清单</span>
+            </button>
+        </div>
+    </nav>
+
+
+    <!-- ============================================== -->
+    <!-- 模态弹窗与抽屉面板 (移动端底部抽屉优化) -->
     <!-- ============================================== -->
 
-    <!-- 1. 新增/编辑礼品弹窗 -->
-    <div id="gift-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 border border-slate-700 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 id="gift-modal-title" class="text-lg font-bold text-white">新增礼品</h3>
+    <!-- 1. 新增/编辑礼品弹窗 (移动端采用大圆角底部抽屉式排版) -->
+    <div id="gift-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="glass-panel w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 border-t sm:border border-slate-700 shadow-2xl relative space-y-4 max-h-[92vh] flex flex-col justify-between">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-shrink-0">
+                <h3 id="gift-modal-title" class="text-base sm:text-lg font-bold text-white">新增礼品</h3>
                 <button onclick="closeGiftModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <form id="gift-form" onsubmit="handleSaveGift(event)" class="space-y-4">
+            <form id="gift-form" onsubmit="handleSaveGift(event)" class="space-y-3.5 overflow-y-auto flex-1 pr-1">
                 <input type="hidden" id="modal-gift-id">
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">礼品名称 *</label>
                     <input id="modal-gift-name" type="text" required placeholder="如：高端定制商务钢笔礼盒"
-                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">礼品分类</label>
-                        <select id="modal-gift-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">分类</label>
+                        <select id="modal-gift-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                             <option value="商务办公">商务办公</option>
                             <option value="数码科技">数码科技</option>
                             <option value="茗茶滋补">茗茶滋补</option>
@@ -362,56 +437,56 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">单价 / 估值</label>
                         <input id="modal-gift-price" type="text" placeholder="如：¥ 299"
-                               class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                               class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                     </div>
                 </div>
 
                 <!-- 礼品图片 -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">礼品图片 (可上传本地图片或选择预设)</label>
-                    <div class="flex items-center space-x-3 mb-2">
-                        <div class="w-16 h-16 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">礼品配图</label>
+                    <div class="flex items-center space-x-2.5 mb-2">
+                        <div class="w-14 h-14 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center flex-shrink-0">
                             <img id="modal-gift-preview" src="./assets/flask.png" class="w-full h-full object-cover">
                         </div>
-                        <div class="flex-1 space-y-1.5">
-                            <label class="cursor-pointer inline-flex items-center px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-medium text-slate-200 transition">
-                                <i data-lucide="upload" class="w-3.5 h-3.5 mr-1.5"></i>
-                                <span>上传本地图片文件</span>
+                        <div class="flex-1 space-y-1">
+                            <label class="cursor-pointer inline-flex items-center px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-medium text-slate-200 transition active:scale-95">
+                                <i data-lucide="upload" class="w-3.5 h-3.5 mr-1"></i>
+                                <span>上传手机相册图片</span>
                                 <input type="file" id="modal-img-upload" accept="image/*" class="hidden" onchange="handleModalImageUpload(event)">
                             </label>
-                            <input id="modal-gift-image" type="text" placeholder="或输入图片URL / 相对路径"
+                            <input id="modal-gift-image" type="text" placeholder="或填写图片地址"
                                    class="w-full px-2.5 py-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-rose-500">
                         </div>
                     </div>
                     <!-- 预设快速选图 -->
-                    <div class="text-[11px] text-slate-400 mb-1">快速选择预设高质量图样：</div>
-                    <div class="flex items-center space-x-2">
-                        <img src="./assets/flask.png" onclick="setModalImage('./assets/flask.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="保温杯">
-                        <img src="./assets/charger.png" onclick="setModalImage('./assets/charger.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="无线充">
-                        <img src="./assets/tea.png" onclick="setModalImage('./assets/tea.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="红茶礼盒">
-                        <img src="./assets/notebook.png" onclick="setModalImage('./assets/notebook.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="真皮手账">
-                        <img src="./assets/headphones.png" onclick="setModalImage('./assets/headphones.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="耳机">
-                        <img src="./assets/fruit_hamper.png" onclick="setModalImage('./assets/fruit_hamper.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="果篮">
+                    <div class="text-[11px] text-slate-400 mb-1">点击快速选用高质量图样：</div>
+                    <div class="flex items-center space-x-2 overflow-x-auto py-1">
+                        <img src="./assets/flask.png" onclick="setModalImage('./assets/flask.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover flex-shrink-0">
+                        <img src="./assets/charger.png" onclick="setModalImage('./assets/charger.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover flex-shrink-0">
+                        <img src="./assets/tea.png" onclick="setModalImage('./assets/tea.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover flex-shrink-0">
+                        <img src="./assets/notebook.png" onclick="setModalImage('./assets/notebook.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover flex-shrink-0">
+                        <img src="./assets/headphones.png" onclick="setModalImage('./assets/headphones.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover flex-shrink-0">
+                        <img src="./assets/fruit_hamper.png" onclick="setModalImage('./assets/fruit_hamper.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover flex-shrink-0">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">描述信息 *</label>
-                    <textarea id="modal-gift-desc" rows="3" required placeholder="介绍礼品特点、规格、赠礼寓意..."
-                              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500 resize-none"></textarea>
+                    <textarea id="modal-gift-desc" rows="2" required placeholder="介绍礼品特点、规格、赠礼寓意..."
+                              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500 resize-none"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">标签 (逗号分隔)</label>
                     <input id="modal-gift-tags" type="text" placeholder="商务定制, 节日专属, 品质生活"
-                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500">
                 </div>
 
-                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
-                    <button type="button" onclick="closeGiftModal()" class="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800 safe-bottom">
+                    <button type="button" onclick="closeGiftModal()" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition">
                         取消
                     </button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-md transition">
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-95">
                         保存礼品
                     </button>
                 </div>
@@ -420,14 +495,14 @@
     </div>
 
 
-    <!-- 2. 已选礼品清单抽屉 (Cart & Selection Drawer) -->
-    <div id="cart-drawer" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden justify-end">
-        <div class="glass-panel w-full max-w-md h-full p-6 border-l border-slate-800 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+    <!-- 2. 已选礼品清单抽屉 (移动端优化为触控友好的右侧/底部抽屉) -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden justify-end items-end sm:items-stretch">
+        <div class="glass-panel w-full sm:max-w-md h-[88vh] sm:h-full rounded-t-3xl sm:rounded-none p-5 sm:p-6 border-t sm:border-l border-slate-800 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-bottom sm:slide-in-from-right duration-200">
             <div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
                     <div class="flex items-center space-x-2">
                         <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-400"></i>
-                        <h3 class="text-lg font-bold text-white">已选礼品清单</h3>
+                        <h3 class="text-base sm:text-lg font-bold text-white">已选礼品清单</h3>
                     </div>
                     <button onclick="closeCartDrawer()" class="text-slate-400 hover:text-white p-1">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -435,34 +510,34 @@
                 </div>
 
                 <!-- 选中的礼品列表 -->
-                <div id="cart-items-list" class="space-y-3">
+                <div id="cart-items-list" class="space-y-2.5 overflow-y-auto max-h-[46vh] pr-1">
                     <!-- 动态插入已选商品 -->
                 </div>
             </div>
 
             <!-- 清单统计与导出操作 -->
-            <div class="border-t border-slate-800 pt-4 mt-6 space-y-3">
-                <div class="flex items-center justify-between text-sm">
+            <div class="border-t border-slate-800 pt-3 mt-4 space-y-2.5 safe-bottom">
+                <div class="flex items-center justify-between text-xs sm:text-sm">
                     <span class="text-slate-400">选中礼品品类：</span>
                     <span id="cart-summary-kinds" class="font-bold text-white">0 款</span>
                 </div>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-400">礼品总选择数量：</span>
-                    <span id="cart-summary-total-qty" class="text-lg font-black text-amber-400">0 件</span>
+                <div class="flex items-center justify-between text-xs sm:text-sm">
+                    <span class="text-slate-400">礼品总数量：</span>
+                    <span id="cart-summary-total-qty" class="text-base sm:text-lg font-black text-amber-400">0 件</span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 pt-2">
-                    <button onclick="copyCartManifest()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-                        <i data-lucide="copy" class="w-4 h-4 text-emerald-400"></i>
-                        <span>一键复制清单文本</span>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="copyCartManifest()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition active:scale-95">
+                        <i data-lucide="copy" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span>复制清单文本</span>
                     </button>
-                    <button onclick="exportCartCSV()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-sky-400"></i>
+                    <button onclick="exportCartCSV()" class="px-2.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition active:scale-95">
+                        <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-sky-400"></i>
                         <span>导出 CSV 表格</span>
                     </button>
                 </div>
 
-                <button onclick="clearCartConfirm()" class="w-full py-2 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl border border-rose-500/20 transition">
+                <button onclick="clearCartConfirm()" class="w-full py-2 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl border border-rose-500/20 transition active:scale-95">
                     清空已选礼品
                 </button>
             </div>
@@ -470,18 +545,18 @@
     </div>
 
 
-    <!-- 3. 海报大图全屏检视模态窗 (Poster Preview Modal) -->
-    <div id="poster-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="glass-panel max-w-4xl max-h-[92vh] w-full rounded-2xl p-6 border border-slate-700 flex flex-col space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div>
-                    <h3 id="poster-modal-title" class="text-base font-bold text-white">高清宣传图预览</h3>
-                    <p id="poster-modal-subtitle" class="text-xs text-slate-400">商务或活力设计变体</p>
+    <!-- 3. 海报大图全屏检视模态窗 (移动端完美适配) -->
+    <div id="poster-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-2.5 sm:p-4">
+        <div class="glass-panel max-w-4xl max-h-[96vh] w-full rounded-2xl p-4 sm:p-6 border border-slate-700 flex flex-col space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 flex-shrink-0">
+                <div class="min-w-0 pr-2">
+                    <h3 id="poster-modal-title" class="text-sm sm:text-base font-bold text-white truncate">高清宣传图预览</h3>
+                    <p id="poster-modal-subtitle" class="text-[11px] text-slate-400 truncate">商务或活力设计变体</p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button id="poster-modal-download-btn" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition">
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                        <span>下载此款超清海报 (PNG)</span>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <button id="poster-modal-download-btn" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow transition active:scale-95">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        <span>下载 (PNG)</span>
                     </button>
                     <button onclick="closePosterModal()" class="text-slate-400 hover:text-white p-1">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -489,8 +564,8 @@
                 </div>
             </div>
 
-            <div class="flex-1 flex items-center justify-center overflow-auto p-2 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                <canvas id="poster-modal-canvas" class="max-h-[70vh] w-auto rounded-lg shadow-2xl object-contain"></canvas>
+            <div class="flex-1 flex items-center justify-center overflow-auto p-1 bg-slate-950/70 rounded-xl border border-slate-800/80">
+                <canvas id="poster-modal-canvas" class="max-h-[66vh] max-w-[88vw] w-auto h-auto rounded-lg shadow-2xl object-contain"></canvas>
             </div>
         </div>
     </div>
@@ -505,7 +580,7 @@
         let currentAspectRatio = '9:16';
         let currentStyleFilter = 'all';
         let currentCustomImage = './assets/flask.png';
-        let activeRenderedCanvases = []; // 存储当前生成的海报Canvas与元数据
+        let activeRenderedCanvases = [];
 
         // 初始化
         window.addEventListener('DOMContentLoaded', () => {
@@ -513,11 +588,18 @@
             renderCatalog();
             updateCartBadges();
             initGiftSelectOptions();
-            generateAllPosters();
+            generateAllPosters(false);
         });
 
+        function scrollToElement(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
         // ==========================================
-        // 标签页切换逻辑
+        // 标签页切换逻辑 (同时支持桌面端与移动端底部导航栏)
         // ==========================================
         function switchTab(tab) {
             currentTab = tab;
@@ -525,21 +607,38 @@
             const secPoster = document.getElementById('section-poster');
             const btnCatalog = document.getElementById('tab-btn-catalog');
             const btnPoster = document.getElementById('tab-btn-poster');
+            const mobTabCatalog = document.getElementById('mob-tab-catalog');
+            const mobTabPoster = document.getElementById('mob-tab-poster');
 
             if (tab === 'catalog') {
                 secCatalog.classList.remove('hidden');
                 secPoster.classList.add('hidden');
-                btnCatalog.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-rose-600 text-white shadow-sm";
-                btnPoster.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
+                
+                // 桌面端高亮
+                if (btnCatalog) btnCatalog.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-rose-600 text-white shadow-sm";
+                if (btnPoster) btnPoster.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
+                
+                // 移动端高亮
+                if (mobTabCatalog) mobTabCatalog.className = "flex flex-col items-center justify-center text-rose-500 font-bold transition active:scale-95";
+                if (mobTabPoster) mobTabPoster.className = "flex flex-col items-center justify-center text-slate-400 transition active:scale-95";
+                
                 renderCatalog();
             } else {
                 secCatalog.classList.add('hidden');
-                secPoster.classList.remove('reverse', 'hidden');
-                btnCatalog.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
-                btnPoster.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-rose-600 text-white shadow-sm";
+                secPoster.classList.remove('hidden');
+                
+                // 桌面端高亮
+                if (btnCatalog) btnCatalog.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
+                if (btnPoster) btnPoster.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-rose-600 text-white shadow-sm";
+                
+                // 移动端高亮
+                if (mobTabCatalog) mobTabCatalog.className = "flex flex-col items-center justify-center text-slate-400 transition active:scale-95";
+                if (mobTabPoster) mobTabPoster.className = "flex flex-col items-center justify-center text-rose-500 font-bold transition active:scale-95";
+
                 initGiftSelectOptions();
             }
             lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==========================================
@@ -580,58 +679,58 @@
             grid.innerHTML = filtered.map(gift => {
                 const qty = cart[gift.id] || 0;
                 const isSelected = qty > 0;
-                const tagsHtml = (gift.tags || []).map(t => `<span class="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-300 border border-slate-700/60 font-medium">${t}</span>`).join('');
+                const tagsHtml = (gift.tags || []).map(t => `<span class="px-2 py-0.5 rounded text-[10px] sm:text-[11px] bg-slate-800 text-slate-300 border border-slate-700/60 font-medium">${t}</span>`).join('');
 
                 return `
-                    <div class="glass-panel rounded-2xl overflow-hidden border ${isSelected ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-slate-800'} transition-all hover:border-slate-700 group flex flex-col justify-between">
-                        <!-- 礼品图片与徽标 -->
-                        <div class="relative h-56 bg-slate-900 overflow-hidden">
+                    <div class="glass-panel rounded-2xl overflow-hidden border ${isSelected ? 'border-amber-500/70 ring-1 ring-amber-500/40' : 'border-slate-800'} transition-all hover:border-slate-700 group flex flex-col justify-between">
+                        <!-- 礼品图片与快捷操作 -->
+                        <div class="relative h-48 sm:h-56 bg-slate-900 overflow-hidden">
                             <img src="${gift.image}" alt="${gift.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='./assets/flask.png'">
-                            <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-black/60 backdrop-blur-md text-amber-400 border border-amber-500/30">
+                            <div class="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5">
+                                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[11px] font-bold bg-black/60 backdrop-blur-md text-amber-400 border border-amber-500/30">
                                     ${gift.category || '精选礼品'}
                                 </span>
                             </div>
-                            <div class="absolute top-3 right-3 flex items-center space-x-1.5">
-                                <button onclick="openEditGiftModal('${gift.id}')" class="p-2 rounded-xl bg-black/60 backdrop-blur-md hover:bg-slate-800 text-slate-300 hover:text-white transition" title="编辑礼品">
-                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            <div class="absolute top-2.5 right-2.5 flex items-center space-x-1.5">
+                                <button onclick="openEditGiftModal('${gift.id}')" class="p-1.5 sm:p-2 rounded-xl bg-black/60 backdrop-blur-md hover:bg-slate-800 text-slate-300 hover:text-white transition active:scale-95" title="编辑礼品">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                                 </button>
-                                <button onclick="deleteGiftConfirm('${gift.id}')" class="p-2 rounded-xl bg-black/60 backdrop-blur-md hover:bg-rose-900/80 text-rose-400 hover:text-rose-200 transition" title="删除礼品">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                <button onclick="deleteGiftConfirm('${gift.id}')" class="p-1.5 sm:p-2 rounded-xl bg-black/60 backdrop-blur-md hover:bg-rose-900/80 text-rose-400 hover:text-rose-200 transition active:scale-95" title="删除礼品">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                                 </button>
                             </div>
-                            ${isSelected ? `<div class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-xs font-black shadow">已选 ${qty} 件</div>` : ''}
+                            ${isSelected ? `<div class="absolute bottom-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-xs font-black shadow">已选 ${qty} 件</div>` : ''}
                         </div>
 
                         <!-- 礼品详情描述 -->
-                        <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="p-3.5 sm:p-5 flex-1 flex flex-col justify-between space-y-3 sm:space-y-4">
                             <div>
-                                <div class="flex items-start justify-between gap-2 mb-2">
-                                    <h3 class="text-base font-bold text-white group-hover:text-amber-400 transition leading-snug">${gift.name}</h3>
+                                <div class="flex items-start justify-between gap-2 mb-1.5">
+                                    <h3 class="text-sm sm:text-base font-bold text-white group-hover:text-amber-400 transition leading-snug">${gift.name}</h3>
                                     <span class="text-sm font-black text-amber-400 whitespace-nowrap">${gift.price || '待定'}</span>
                                 </div>
-                                <p class="text-xs text-slate-400 line-clamp-2 mb-3 leading-relaxed">${gift.description}</p>
-                                <div class="flex flex-wrap gap-1.5">
+                                <p class="text-xs text-slate-400 line-clamp-2 mb-2.5 leading-relaxed">${gift.description}</p>
+                                <div class="flex flex-wrap gap-1">
                                     ${tagsHtml}
                                 </div>
                             </div>
 
-                            <!-- 数量选择操作条与宣传图联动入口 -->
-                            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
-                                <!-- 步进数量选择器 (支持多选数量) -->
+                            <!-- 数量选择操作条与宣传图联动入口 (移动端大触摸靶区优化) -->
+                            <div class="pt-2.5 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                                <!-- 步进数量选择器 -->
                                 <div class="flex items-center space-x-1 bg-slate-900 rounded-xl p-1 border border-slate-700/80">
-                                    <button onclick="changeGiftQty('${gift.id}', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95">
+                                    <button onclick="changeGiftQty('${gift.id}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-90">
                                         <i data-lucide="minus" class="w-3.5 h-3.5"></i>
                                     </button>
                                     <input type="number" min="0" max="9999" value="${qty}" onchange="setGiftQtyDirect('${gift.id}', this.value)"
-                                           class="w-12 text-center bg-transparent text-sm font-bold text-white focus:outline-none">
-                                    <button onclick="changeGiftQty('${gift.id}', 1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95">
+                                           class="w-10 text-center bg-transparent text-sm font-bold text-white focus:outline-none">
+                                    <button onclick="changeGiftQty('${gift.id}', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-90">
                                         <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                                     </button>
                                 </div>
 
                                 <!-- 一键跳转生成宣传图联动按钮 -->
-                                <button onclick="quickGeneratePosterForGift('${gift.id}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600/90 to-amber-600/90 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow transition">
+                                <button onclick="quickGeneratePosterForGift('${gift.id}')" class="px-3 py-2 rounded-xl bg-gradient-to-r from-rose-600/90 to-amber-600/90 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs flex items-center space-x-1 shadow transition active:scale-95">
                                     <i data-lucide="wand-sparkles" class="w-3.5 h-3.5"></i>
                                     <span>生成宣传图</span>
                                 </button>
@@ -669,11 +768,12 @@
 
             const tabBadge = document.getElementById('tab-cart-badge');
             const floatingCount = document.getElementById('floating-cart-count');
+            const mobCartCount = document.getElementById('mob-cart-count');
             if (tabBadge) tabBadge.innerText = kinds;
             if (floatingCount) floatingCount.innerText = totalQty;
+            if (mobCartCount) mobCartCount.innerText = totalQty;
         }
 
-        // 恢复预设数据
         function resetDefaultData() {
             if (confirm('确定要恢复默认预设礼品列表吗？当前自定义礼品将被重置。')) {
                 GiftStorage.resetToDefault();
@@ -809,20 +909,20 @@
             listContainer.innerHTML = selectedGifts.map(gift => {
                 const qty = cart[gift.id];
                 return `
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                        <div class="flex items-center space-x-3 min-w-0">
-                            <img src="${gift.image}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-slate-700">
+                    <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                        <div class="flex items-center space-x-2.5 min-w-0">
+                            <img src="${gift.image}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0 border border-slate-700">
                             <div class="min-w-0">
                                 <h4 class="text-xs font-bold text-white truncate">${gift.name}</h4>
                                 <p class="text-[11px] text-amber-400 font-semibold">${gift.price || '待定'}</p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-1.5 flex-shrink-0">
-                            <button onclick="changeGiftQty('${gift.id}', -1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-xs">
+                        <div class="flex items-center space-x-1 flex-shrink-0">
+                            <button onclick="changeGiftQty('${gift.id}', -1)" class="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-xs active:scale-90">
                                 -
                             </button>
-                            <span class="w-8 text-center text-xs font-bold text-white">${qty}</span>
-                            <button onclick="changeGiftQty('${gift.id}', 1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-xs">
+                            <span class="w-7 text-center text-xs font-bold text-white">${qty}</span>
+                            <button onclick="changeGiftQty('${gift.id}', 1)" class="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-xs active:scale-90">
                                 +
                             </button>
                         </div>
@@ -917,7 +1017,7 @@
                 document.getElementById('poster-img-element').classList.remove('hidden');
             }
 
-            generateAllPosters();
+            generateAllPosters(false);
         }
 
         function quickGeneratePosterForGift(giftId) {
@@ -925,6 +1025,9 @@
             const sel = document.getElementById('poster-gift-select');
             if (sel) sel.value = giftId;
             onSelectGiftForPoster(giftId);
+            setTimeout(() => {
+                scrollToElement('posters-gallery-section');
+            }, 300);
         }
 
         function populateFormFromPreset() {
@@ -937,29 +1040,29 @@
             currentCustomImage = './assets/tea.png';
             document.getElementById('poster-img-element').src = './assets/tea.png';
             document.getElementById('poster-img-element').classList.remove('hidden');
-            generateAllPosters();
+            generateAllPosters(true);
         }
 
         function setPosterAspectRatio(ratio) {
             currentAspectRatio = ratio;
             document.querySelectorAll('.ratio-btn').forEach(btn => {
-                btn.className = "ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700";
+                btn.className = "ratio-btn px-2 py-2 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700 active:scale-95";
             });
             const activeBtn = document.getElementById(`ratio-btn-${ratio.replace(':', '-')}`);
             if (activeBtn) {
-                activeBtn.className = "ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-rose-500 bg-rose-600 text-white text-center";
+                activeBtn.className = "ratio-btn px-2 py-2 rounded-lg text-xs font-semibold border border-rose-500 bg-rose-600 text-white text-center active:scale-95";
             }
-            generateAllPosters();
+            generateAllPosters(false);
         }
 
         function setPosterStyleFilter(style) {
             currentStyleFilter = style;
             document.querySelectorAll('.style-filter-btn').forEach(btn => {
-                btn.className = "style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700";
+                btn.className = "style-filter-btn px-2 py-2 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700 active:scale-95";
             });
             const activeBtn = document.getElementById(`style-btn-${style}`);
             if (activeBtn) {
-                activeBtn.className = "style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-amber-500 bg-amber-600 text-slate-950 text-center font-bold";
+                activeBtn.className = "style-filter-btn px-2 py-2 rounded-lg text-xs font-bold border border-amber-500 bg-amber-600 text-slate-950 text-center active:scale-95";
             }
             renderPosterGallery();
         }
@@ -967,7 +1070,7 @@
         function clearPosterImage() {
             currentCustomImage = null;
             document.getElementById('poster-img-element').classList.add('hidden');
-            generateAllPosters();
+            generateAllPosters(false);
         }
 
         function handlePosterImageUpload(e) {
@@ -979,26 +1082,26 @@
                 const el = document.getElementById('poster-img-element');
                 el.src = currentCustomImage;
                 el.classList.remove('hidden');
-                generateAllPosters();
+                generateAllPosters(true);
             };
             reader.readAsDataURL(file);
         }
 
         /**
          * 批量生成海报 (商务多款 + 活力多款)
+         * @param {boolean} shouldScrollToGallery 移动端是否自动平滑滚动到结果展示区
          */
-        async function generateAllPosters() {
+        async function generateAllPosters(shouldScrollToGallery = false) {
             const container = document.getElementById('posters-gallery-container');
             if (!container) return;
 
             container.innerHTML = `
-                <div class="col-span-full py-20 text-center">
-                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-400 border-t-transparent mb-3"></div>
-                    <p class="text-sm text-slate-400">正在生成超清设计宣传图，请稍候...</p>
+                <div class="col-span-full py-16 text-center">
+                    <div class="inline-block animate-spin rounded-full h-7 w-7 border-4 border-amber-400 border-t-transparent mb-2.5"></div>
+                    <p class="text-xs sm:text-sm text-slate-400">正在生成超清设计宣传图，请稍候...</p>
                 </div>
             `;
 
-            // 获取输入表单数据
             const title = (document.getElementById('poster-title')?.value || '').trim() || '尊享礼品';
             const slogan = (document.getElementById('poster-slogan')?.value || '').trim() || '品质之选 · 心意呈献';
             const tagsStr = (document.getElementById('poster-tags')?.value || '').trim();
@@ -1019,7 +1122,6 @@
 
             activeRenderedCanvases = [];
 
-            // 遍历所有变体生成
             for (const variant of POSTER_VARIANTS) {
                 const canvas = await PosterEngine.renderVariant(variant, posterData, {
                     aspectRatio: currentAspectRatio
@@ -1033,10 +1135,16 @@
             }
 
             renderPosterGallery();
+
+            if (shouldScrollToGallery && window.innerWidth < 1024) {
+                setTimeout(() => {
+                    scrollToElement('posters-gallery-section');
+                }, 150);
+            }
         }
 
         /**
-         * 渲染海报挑选画廊卡片
+         * 渲染海报挑选画廊卡片 (手机端触控优化)
          */
         function renderPosterGallery() {
             const container = document.getElementById('posters-gallery-container');
@@ -1063,41 +1171,42 @@
 
                 // 缩略预览容器
                 const previewContainer = document.createElement('div');
-                previewContainer.className = "relative p-4 flex items-center justify-center bg-slate-950/70 overflow-hidden cursor-pointer";
-                previewContainer.style.minHeight = "340px";
+                previewContainer.className = "relative p-3 sm:p-4 flex items-center justify-center bg-slate-950/70 overflow-hidden cursor-pointer";
+                previewContainer.style.minHeight = window.innerWidth < 640 ? "260px" : "320px";
                 previewContainer.onclick = () => openPosterModal(index);
 
                 // 创建小预览 canvas
                 const previewCanvas = document.createElement('canvas');
                 const orig = item.canvas;
-                const scale = 360 / orig.width;
-                previewCanvas.width = 360;
+                const targetW = window.innerWidth < 640 ? 300 : 360;
+                const scale = targetW / orig.width;
+                previewCanvas.width = targetW;
                 previewCanvas.height = orig.height * scale;
                 const pctx = previewCanvas.getContext('2d');
                 pctx.drawImage(orig, 0, 0, previewCanvas.width, previewCanvas.height);
-                previewCanvas.className = "rounded-lg shadow-xl max-h-[360px] object-contain group-hover:scale-[1.02] transition-transform duration-300";
+                previewCanvas.className = "rounded-lg shadow-xl max-h-[300px] sm:max-h-[360px] object-contain group-hover:scale-[1.02] transition-transform duration-300";
                 previewContainer.appendChild(previewCanvas);
 
                 // 悬浮放大查看角标
                 const hoverOverlay = document.createElement('div');
                 hoverOverlay.className = "absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none";
-                hoverOverlay.innerHTML = `<span class="px-3 py-1.5 rounded-xl bg-black/70 text-white text-xs font-semibold flex items-center gap-1.5 shadow"><i data-lucide="zoom-in" class="w-4 h-4"></i> 点击放大全屏检视</span>`;
+                hoverOverlay.innerHTML = `<span class="px-3 py-1.5 rounded-xl bg-black/75 text-white text-xs font-semibold flex items-center gap-1 shadow"><i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> 点击放大全屏检视</span>`;
                 previewContainer.appendChild(hoverOverlay);
 
                 // 卡片底部说明与下载动作
                 const footer = document.createElement('div');
-                footer.className = "p-4 border-t border-slate-800/80 flex items-center justify-between";
+                footer.className = "p-3 sm:p-4 border-t border-slate-800/80 flex items-center justify-between";
                 footer.innerHTML = `
-                    <div>
-                        <div class="flex items-center space-x-2">
+                    <div class="min-w-0 pr-2">
+                        <div class="flex items-center space-x-1.5">
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${styleBadgeClass}">
                                 ${item.variant.styleName}
                             </span>
-                            <span class="text-xs font-bold text-white">${item.variant.name}</span>
+                            <span class="text-xs font-bold text-white truncate">${item.variant.name}</span>
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-1">${item.aspectRatio} · ${item.canvas.width}x${item.canvas.height}px</p>
+                        <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">${item.aspectRatio} · ${item.canvas.width}x${item.canvas.height}px</p>
                     </div>
-                    <button class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
+                    <button class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1 transition active:scale-95 shadow flex-shrink-0">
                         <i data-lucide="download" class="w-3.5 h-3.5"></i>
                         <span>下载</span>
                     </button>
@@ -1126,7 +1235,7 @@
             if (!item) return;
 
             document.getElementById('poster-modal-title').innerText = `${item.variant.styleName} · ${item.variant.name}`;
-            document.getElementById('poster-modal-subtitle').innerText = `尺寸比例: ${item.aspectRatio} (${item.canvas.width} × ${item.canvas.height} 像素 高清无损)`;
+            document.getElementById('poster-modal-subtitle').innerText = `${item.aspectRatio} (${item.canvas.width} × ${item.canvas.height}px)`;
 
             const modalCanvas = document.getElementById('poster-modal-canvas');
             modalCanvas.width = item.canvas.width;
@@ -1134,7 +1243,6 @@
             const ctx = modalCanvas.getContext('2d');
             ctx.drawImage(item.canvas, 0, 0);
 
-            // 绑定下载按钮
             const dlBtn = document.getElementById('poster-modal-download-btn');
             dlBtn.onclick = () => {
                 const filename = `宣传图_${item.variant.styleName}_${item.variant.name}_${Date.now()}.png`;
