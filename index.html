@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>礼品中心 - 礼品选择与营销宣传图智能工坊</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- JSZip for batch poster export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdf8f6',
+                            100: '#f2e8e5',
+                            500: '#e0533c',
+                            600: '#c83f2a',
+                            700: '#a32f1d',
+                        },
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#d4af37',
+                            600: '#b48a1c',
+                        },
+                        biz: {
+                            800: '#111827',
+                            900: '#090d16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .poster-card-preview:hover .poster-overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-rose-500 selection:text-white">
+
+    <!-- 顶部导航栏 -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-900/30">
+                    <i data-lucide="gift" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        礼品综合工坊
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">商务 & 活力</span>
+                    </span>
+                    <p class="text-xs text-slate-400">礼品库管理与多风格宣传图一键生成</p>
+                </div>
+            </div>
+
+            <!-- 功能选项卡切换 -->
+            <nav class="flex items-center bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
+                <button id="tab-btn-catalog" onclick="switchTab('catalog')" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-rose-600 text-white shadow-sm">
+                    <i data-lucide="package" class="w-4 h-4"></i>
+                    <span>礼品挑选与管理</span>
+                    <span id="tab-cart-badge" class="ml-1.5 px-2 py-0.2 text-xs bg-black/40 rounded-full font-bold">0</span>
+                </button>
+                <button id="tab-btn-poster" onclick="switchTab('poster')" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white">
+                    <i data-lucide="wand-sparkles" class="w-4 h-4"></i>
+                    <span>宣传图生成器</span>
+                    <span class="text-xs px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 ml-1">双风格多款</span>
+                </button>
+            </nav>
+
+            <!-- 右侧快捷按钮 -->
+            <div class="flex items-center space-x-3">
+                <button onclick="openCartDrawer()" class="relative p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition" title="查看已选礼品清单">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                    <span id="floating-cart-count" class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-xs font-black w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-slate-900">0</span>
+                </button>
+                <button onclick="openAddGiftModal()" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-md transition">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>新增礼品</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主体内容区域 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ============================================== -->
+        <!-- 模块一：礼品挑选与管理 (Gift Catalog & Selection) -->
+        <!-- ============================================== -->
+        <section id="section-catalog" class="space-y-6">
+            <!-- 顶栏状态与筛选 -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl glass-panel">
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="relative min-w-[260px]">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                        <input id="catalog-search" type="text" placeholder="搜索礼品名称、标签或描述..." oninput="renderCatalog()"
+                               class="w-full pl-10 pr-4 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-rose-500 transition">
+                    </div>
+                    <select id="catalog-filter-category" onchange="renderCatalog()" class="px-3.5 py-2 bg-slate-900/90 border border-slate-700/80 rounded-xl text-sm text-slate-300 focus:outline-none focus:border-rose-500">
+                        <option value="ALL">全部分类</option>
+                        <option value="商务办公">商务办公</option>
+                        <option value="数码科技">数码科技</option>
+                        <option value="茗茶滋补">茗茶滋补</option>
+                        <option value="生鲜果礼">生鲜果礼</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <div class="text-xs text-slate-400">
+                        共 <span id="catalog-total-count" class="font-bold text-amber-400">6</span> 件礼品，已选 <span id="catalog-selected-count" class="font-bold text-rose-400">0</span> 种
+                    </div>
+                    <button onclick="resetDefaultData()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg border border-slate-700/50 transition flex items-center gap-1">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        <span>恢复预设</span>
+                    </button>
+                    <button onclick="openCartDrawer()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-200 flex items-center space-x-1.5 transition">
+                        <i data-lucide="list-ordered" class="w-4 h-4 text-amber-400"></i>
+                        <span>管理选择清单</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 礼品网格展示列表 -->
+            <div id="gifts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 动态渲染礼品卡片 -->
+            </div>
+        </section>
+
+
+        <!-- ============================================== -->
+        <!-- 模块二：宣传图生成器 (Poster Generation Studio) -->
+        <!-- ============================================== -->
+        <section id="section-poster" class="space-y-8 hidden">
+            <!-- 宣传图生成控制面板 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- 左侧表单参数调节 (4 Cols) -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="p-6 rounded-2xl glass-panel space-y-5">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <i data-lucide="sliders" class="w-5 h-5 text-rose-500"></i>
+                                宣传图参数设定
+                            </h2>
+                            <button onclick="populateFormFromPreset()" class="text-xs text-amber-400 hover:underline flex items-center gap-1">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                                填入示例
+                            </button>
+                        </div>
+
+                        <!-- 快速从礼品库选择 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">从现有礼品库一键载入</label>
+                            <select id="poster-gift-select" onchange="onSelectGiftForPoster(this.value)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                                <option value="">-- 选择已有礼品自动填充 --</option>
+                            </select>
+                        </div>
+
+                        <!-- 礼品主标题 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">礼品主名称 (Headline) *</label>
+                            <input id="poster-title" type="text" placeholder="例如：商务高端定制保温杯礼盒" value="商务高端定制保温杯礼盒"
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                        </div>
+
+                        <!-- 宣传标语 / 副标题 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">宣传标语 / 副标题 (Slogan)</label>
+                            <input id="poster-slogan" type="text" placeholder="例如：臻选品质生活 · 传递温情心意" value="臻选品质生活 · 传递温情心意"
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                        </div>
+
+                        <!-- 活动徽章标签 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">活动徽章 / 卖点标签 (用逗号分隔)</label>
+                            <input id="poster-tags" type="text" placeholder="商务甄选, VIP定制, 实用轻奢" value="商务甄选, VIP定制, 实用轻奢"
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                        </div>
+
+                        <!-- 详细描述 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">详细文案描述 (Description)</label>
+                            <textarea id="poster-desc" rows="3" placeholder="输入核心材质、特色、适用场景等..."
+                                      class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500 resize-none">316L医用级不锈钢内胆，智能触显水温，轻奢商务黑金配色，内含定制金尖签字笔，尊崇致礼。</textarea>
+                        </div>
+
+                        <!-- 专享价格/价值展示 -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">专享价格/价值</label>
+                                <input id="poster-price" type="text" placeholder="¥ 299" value="¥ 299"
+                                       class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">行动按钮文字</label>
+                                <input id="poster-cta" type="text" placeholder="VIP 专享礼遇 ➔" value="VIP 专享礼遇 ➔"
+                                       class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                            </div>
+                        </div>
+
+                        <!-- 礼品主体图片上传 / 选择 -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-semibold text-slate-300">礼品配图 (可选，无图将自动生成文字艺术勋章)</label>
+                                <button type="button" onclick="clearPosterImage()" class="text-xs text-rose-400 hover:underline">清空图片</button>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div id="poster-img-preview" class="w-14 h-14 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    <img id="poster-img-element" src="./assets/flask.png" class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <label class="cursor-pointer flex items-center justify-center w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-xs text-slate-200 font-medium transition">
+                                        <i data-lucide="upload" class="w-4 h-4 mr-1.5"></i>
+                                        <span>上传本地图片</span>
+                                        <input type="file" id="poster-upload-input" accept="image/*" class="hidden" onchange="handlePosterImageUpload(event)">
+                                    </label>
+                                    <p class="text-[10px] text-slate-400 mt-1">支持 PNG, JPG, WebP 格式</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 尺寸比例与风格筛选 -->
+                        <div class="pt-3 border-t border-slate-800 space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">海报比例与尺寸</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" onclick="setPosterAspectRatio('9:16')" id="ratio-btn-9-16" class="ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-rose-500 bg-rose-600 text-white text-center">
+                                        9:16 手机
+                                    </button>
+                                    <button type="button" onclick="setPosterAspectRatio('3:4')" id="ratio-btn-3-4" class="ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700">
+                                        3:4 卡片
+                                    </button>
+                                    <button type="button" onclick="setPosterAspectRatio('1:1')" id="ratio-btn-1-1" class="ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700">
+                                        1:1 正方
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">展示风格类别</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" onclick="setPosterStyleFilter('all')" id="style-btn-all" class="style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-amber-500 bg-amber-600 text-slate-950 text-center font-bold">
+                                        全部风格 (8款)
+                                    </button>
+                                    <button type="button" onclick="setPosterStyleFilter('business')" id="style-btn-business" class="style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700">
+                                        商务专属 (4款)
+                                    </button>
+                                    <button type="button" onclick="setPosterStyleFilter('vibrant')" id="style-btn-vibrant" class="style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700">
+                                        活力热推 (4款)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 核心生成触发按钮 -->
+                        <div class="pt-2">
+                            <button onclick="generateAllPosters()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-bold text-sm shadow-lg shadow-rose-950/50 flex items-center justify-center space-x-2 transition transform active:scale-95">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                <span>立即实时生成多款宣传图</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧海报画廊挑选与下载 (8 Cols) -->
+                <div class="lg:col-span-8 space-y-6">
+                    <div class="flex items-center justify-between p-4 rounded-2xl glass-panel">
+                        <div>
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <i data-lucide="layout-grid" class="w-5 h-5 text-amber-400"></i>
+                                宣传图挑选与下载区
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-0.5">支持在线挑选多款商务、活力高清海报，点击即可放大或直接一键下载</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="downloadAllPostersAsZip()" id="btn-batch-download" class="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-amber-300 transition">
+                                <i data-lucide="archive" class="w-4 h-4"></i>
+                                <span>打包下载全套 ZIP</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 动态生成渲染画廊 -->
+                    <div id="posters-gallery-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                        <!-- 动态填充各类海报卡片 -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ============================================== -->
+    <!-- 模态弹窗与抽屉面板 -->
+    <!-- ============================================== -->
+
+    <!-- 1. 新增/编辑礼品弹窗 -->
+    <div id="gift-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 border border-slate-700 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 id="gift-modal-title" class="text-lg font-bold text-white">新增礼品</h3>
+                <button onclick="closeGiftModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="gift-form" onsubmit="handleSaveGift(event)" class="space-y-4">
+                <input type="hidden" id="modal-gift-id">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">礼品名称 *</label>
+                    <input id="modal-gift-name" type="text" required placeholder="如：高端定制商务钢笔礼盒"
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">礼品分类</label>
+                        <select id="modal-gift-category" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                            <option value="商务办公">商务办公</option>
+                            <option value="数码科技">数码科技</option>
+                            <option value="茗茶滋补">茗茶滋补</option>
+                            <option value="生鲜果礼">生鲜果礼</option>
+                            <option value="文创生活">文创生活</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">单价 / 估值</label>
+                        <input id="modal-gift-price" type="text" placeholder="如：¥ 299"
+                               class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                    </div>
+                </div>
+
+                <!-- 礼品图片 -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">礼品图片 (可上传本地图片或选择预设)</label>
+                    <div class="flex items-center space-x-3 mb-2">
+                        <div class="w-16 h-16 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center flex-shrink-0">
+                            <img id="modal-gift-preview" src="./assets/flask.png" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 space-y-1.5">
+                            <label class="cursor-pointer inline-flex items-center px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-medium text-slate-200 transition">
+                                <i data-lucide="upload" class="w-3.5 h-3.5 mr-1.5"></i>
+                                <span>上传本地图片文件</span>
+                                <input type="file" id="modal-img-upload" accept="image/*" class="hidden" onchange="handleModalImageUpload(event)">
+                            </label>
+                            <input id="modal-gift-image" type="text" placeholder="或输入图片URL / 相对路径"
+                                   class="w-full px-2.5 py-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-rose-500">
+                        </div>
+                    </div>
+                    <!-- 预设快速选图 -->
+                    <div class="text-[11px] text-slate-400 mb-1">快速选择预设高质量图样：</div>
+                    <div class="flex items-center space-x-2">
+                        <img src="./assets/flask.png" onclick="setModalImage('./assets/flask.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="保温杯">
+                        <img src="./assets/charger.png" onclick="setModalImage('./assets/charger.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="无线充">
+                        <img src="./assets/tea.png" onclick="setModalImage('./assets/tea.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="红茶礼盒">
+                        <img src="./assets/notebook.png" onclick="setModalImage('./assets/notebook.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="真皮手账">
+                        <img src="./assets/headphones.png" onclick="setModalImage('./assets/headphones.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="耳机">
+                        <img src="./assets/fruit_hamper.png" onclick="setModalImage('./assets/fruit_hamper.png')" class="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-400 transition object-cover" title="果篮">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">描述信息 *</label>
+                    <textarea id="modal-gift-desc" rows="3" required placeholder="介绍礼品特点、规格、赠礼寓意..."
+                              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500 resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">标签 (逗号分隔)</label>
+                    <input id="modal-gift-tags" type="text" placeholder="商务定制, 节日专属, 品质生活"
+                           class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeGiftModal()" class="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                        取消
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-md transition">
+                        保存礼品
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- 2. 已选礼品清单抽屉 (Cart & Selection Drawer) -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden justify-end">
+        <div class="glass-panel w-full max-w-md h-full p-6 border-l border-slate-800 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200">
+            <div>
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-400"></i>
+                        <h3 class="text-lg font-bold text-white">已选礼品清单</h3>
+                    </div>
+                    <button onclick="closeCartDrawer()" class="text-slate-400 hover:text-white p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- 选中的礼品列表 -->
+                <div id="cart-items-list" class="space-y-3">
+                    <!-- 动态插入已选商品 -->
+                </div>
+            </div>
+
+            <!-- 清单统计与导出操作 -->
+            <div class="border-t border-slate-800 pt-4 mt-6 space-y-3">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-400">选中礼品品类：</span>
+                    <span id="cart-summary-kinds" class="font-bold text-white">0 款</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-400">礼品总选择数量：</span>
+                    <span id="cart-summary-total-qty" class="text-lg font-black text-amber-400">0 件</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button onclick="copyCartManifest()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                        <i data-lucide="copy" class="w-4 h-4 text-emerald-400"></i>
+                        <span>一键复制清单文本</span>
+                    </button>
+                    <button onclick="exportCartCSV()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-sky-400"></i>
+                        <span>导出 CSV 表格</span>
+                    </button>
+                </div>
+
+                <button onclick="clearCartConfirm()" class="w-full py-2 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl border border-rose-500/20 transition">
+                    清空已选礼品
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 3. 海报大图全屏检视模态窗 (Poster Preview Modal) -->
+    <div id="poster-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-panel max-w-4xl max-h-[92vh] w-full rounded-2xl p-6 border border-slate-700 flex flex-col space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 id="poster-modal-title" class="text-base font-bold text-white">高清宣传图预览</h3>
+                    <p id="poster-modal-subtitle" class="text-xs text-slate-400">商务或活力设计变体</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="poster-modal-download-btn" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>下载此款超清海报 (PNG)</span>
+                    </button>
+                    <button onclick="closePosterModal()" class="text-slate-400 hover:text-white p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 flex items-center justify-center overflow-auto p-2 bg-slate-950/60 rounded-xl border border-slate-800/80">
+                <canvas id="poster-modal-canvas" class="max-h-[70vh] w-auto rounded-lg shadow-2xl object-contain"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 核心业务逻辑脚本 -->
+    <script src="./gifts_data.js"></script>
+    <script src="./poster_engine.js"></script>
+    <script>
+        // 当前全局状态
+        let currentTab = 'catalog';
+        let currentAspectRatio = '9:16';
+        let currentStyleFilter = 'all';
+        let currentCustomImage = './assets/flask.png';
+        let activeRenderedCanvases = []; // 存储当前生成的海报Canvas与元数据
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderCatalog();
+            updateCartBadges();
+            initGiftSelectOptions();
+            generateAllPosters();
+        });
+
+        // ==========================================
+        // 标签页切换逻辑
+        // ==========================================
+        function switchTab(tab) {
+            currentTab = tab;
+            const secCatalog = document.getElementById('section-catalog');
+            const secPoster = document.getElementById('section-poster');
+            const btnCatalog = document.getElementById('tab-btn-catalog');
+            const btnPoster = document.getElementById('tab-btn-poster');
+
+            if (tab === 'catalog') {
+                secCatalog.classList.remove('hidden');
+                secPoster.classList.add('hidden');
+                btnCatalog.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-rose-600 text-white shadow-sm";
+                btnPoster.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
+                renderCatalog();
+            } else {
+                secCatalog.classList.add('hidden');
+                secPoster.classList.remove('reverse', 'hidden');
+                btnCatalog.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white";
+                btnPoster.className = "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-rose-600 text-white shadow-sm";
+                initGiftSelectOptions();
+            }
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // 礼品挑选与展示模块 (Catalog)
+        // ==========================================
+        function renderCatalog() {
+            const gifts = GiftStorage.getGifts();
+            const cart = GiftStorage.getCart();
+            const searchKeyword = (document.getElementById('catalog-search')?.value || '').trim().toLowerCase();
+            const categoryFilter = document.getElementById('catalog-filter-category')?.value || 'ALL';
+
+            const filtered = gifts.filter(gift => {
+                const matchCat = categoryFilter === 'ALL' || gift.category === categoryFilter;
+                const matchKw = !searchKeyword || 
+                    gift.name.toLowerCase().includes(searchKeyword) ||
+                    gift.description.toLowerCase().includes(searchKeyword) ||
+                    (gift.tags && gift.tags.some(t => t.toLowerCase().includes(searchKeyword)));
+                return matchCat && matchKw;
+            });
+
+            document.getElementById('catalog-total-count').innerText = gifts.length;
+            document.getElementById('catalog-selected-count').innerText = Object.keys(cart).length;
+
+            const grid = document.getElementById('gifts-grid');
+            if (!grid) return;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-500">
+                        <i data-lucide="package-open" class="w-12 h-12 mx-auto mb-3 opacity-40"></i>
+                        <p class="text-sm">没有找到匹配的礼品项</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            grid.innerHTML = filtered.map(gift => {
+                const qty = cart[gift.id] || 0;
+                const isSelected = qty > 0;
+                const tagsHtml = (gift.tags || []).map(t => `<span class="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-300 border border-slate-700/60 font-medium">${t}</span>`).join('');
+
+                return `
+                    <div class="glass-panel rounded-2xl overflow-hidden border ${isSelected ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-slate-800'} transition-all hover:border-slate-700 group flex flex-col justify-between">
+                        <!-- 礼品图片与徽标 -->
+                        <div class="relative h-56 bg-slate-900 overflow-hidden">
+                            <img src="${gift.image}" alt="${gift.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='./assets/flask.png'">
+                            <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-black/60 backdrop-blur-md text-amber-400 border border-amber-500/30">
+                                    ${gift.category || '精选礼品'}
+                                </span>
+                            </div>
+                            <div class="absolute top-3 right-3 flex items-center space-x-1.5">
+                                <button onclick="openEditGiftModal('${gift.id}')" class="p-2 rounded-xl bg-black/60 backdrop-blur-md hover:bg-slate-800 text-slate-300 hover:text-white transition" title="编辑礼品">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="deleteGiftConfirm('${gift.id}')" class="p-2 rounded-xl bg-black/60 backdrop-blur-md hover:bg-rose-900/80 text-rose-400 hover:text-rose-200 transition" title="删除礼品">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            ${isSelected ? `<div class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-xs font-black shadow">已选 ${qty} 件</div>` : ''}
+                        </div>
+
+                        <!-- 礼品详情描述 -->
+                        <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <h3 class="text-base font-bold text-white group-hover:text-amber-400 transition leading-snug">${gift.name}</h3>
+                                    <span class="text-sm font-black text-amber-400 whitespace-nowrap">${gift.price || '待定'}</span>
+                                </div>
+                                <p class="text-xs text-slate-400 line-clamp-2 mb-3 leading-relaxed">${gift.description}</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${tagsHtml}
+                                </div>
+                            </div>
+
+                            <!-- 数量选择操作条与宣传图联动入口 -->
+                            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                                <!-- 步进数量选择器 (支持多选数量) -->
+                                <div class="flex items-center space-x-1 bg-slate-900 rounded-xl p-1 border border-slate-700/80">
+                                    <button onclick="changeGiftQty('${gift.id}', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95">
+                                        <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <input type="number" min="0" max="9999" value="${qty}" onchange="setGiftQtyDirect('${gift.id}', this.value)"
+                                           class="w-12 text-center bg-transparent text-sm font-bold text-white focus:outline-none">
+                                    <button onclick="changeGiftQty('${gift.id}', 1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95">
+                                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+
+                                <!-- 一键跳转生成宣传图联动按钮 -->
+                                <button onclick="quickGeneratePosterForGift('${gift.id}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600/90 to-amber-600/90 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow transition">
+                                    <i data-lucide="wand-sparkles" class="w-3.5 h-3.5"></i>
+                                    <span>生成宣传图</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+            updateCartBadges();
+        }
+
+        // 数量操作
+        function changeGiftQty(id, delta) {
+            const cart = GiftStorage.getCart();
+            const current = cart[id] || 0;
+            const next = Math.max(0, current + delta);
+            GiftStorage.setQuantity(id, next);
+            renderCatalog();
+            renderCartDrawer();
+        }
+
+        function setGiftQtyDirect(id, val) {
+            const num = parseInt(val, 10) || 0;
+            GiftStorage.setQuantity(id, num);
+            renderCatalog();
+            renderCartDrawer();
+        }
+
+        function updateCartBadges() {
+            const cart = GiftStorage.getCart();
+            const kinds = Object.keys(cart).length;
+            const totalQty = Object.values(cart).reduce((a, b) => a + b, 0);
+
+            const tabBadge = document.getElementById('tab-cart-badge');
+            const floatingCount = document.getElementById('floating-cart-count');
+            if (tabBadge) tabBadge.innerText = kinds;
+            if (floatingCount) floatingCount.innerText = totalQty;
+        }
+
+        // 恢复预设数据
+        function resetDefaultData() {
+            if (confirm('确定要恢复默认预设礼品列表吗？当前自定义礼品将被重置。')) {
+                GiftStorage.resetToDefault();
+                renderCatalog();
+                initGiftSelectOptions();
+                alert('已成功恢复预设礼品数据！');
+            }
+        }
+
+        // ==========================================
+        // 礼品管理 CRUD 模态窗逻辑
+        // ==========================================
+        function openAddGiftModal() {
+            document.getElementById('gift-form').reset();
+            document.getElementById('modal-gift-id').value = '';
+            document.getElementById('gift-modal-title').innerText = '新增礼品项';
+            document.getElementById('modal-gift-preview').src = './assets/flask.png';
+            document.getElementById('modal-gift-image').value = './assets/flask.png';
+            document.getElementById('gift-modal').classList.remove('hidden');
+            document.getElementById('gift-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function openEditGiftModal(id) {
+            const gifts = GiftStorage.getGifts();
+            const gift = gifts.find(g => g.id === id);
+            if (!gift) return;
+
+            document.getElementById('modal-gift-id').value = gift.id;
+            document.getElementById('gift-modal-title').innerText = '编辑礼品项';
+            document.getElementById('modal-gift-name').value = gift.name;
+            document.getElementById('modal-gift-category').value = gift.category || '商务办公';
+            document.getElementById('modal-gift-price').value = gift.price || '';
+            document.getElementById('modal-gift-image').value = gift.image || '';
+            document.getElementById('modal-gift-preview').src = gift.image || './assets/flask.png';
+            document.getElementById('modal-gift-desc').value = gift.description || '';
+            document.getElementById('modal-gift-tags').value = (gift.tags || []).join(', ');
+
+            document.getElementById('gift-modal').classList.remove('hidden');
+            document.getElementById('gift-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeGiftModal() {
+            document.getElementById('gift-modal').classList.add('hidden');
+            document.getElementById('gift-modal').classList.remove('flex');
+        }
+
+        function setModalImage(src) {
+            document.getElementById('modal-gift-preview').src = src;
+            document.getElementById('modal-gift-image').value = src;
+        }
+
+        function handleModalImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const base64 = evt.target.result;
+                setModalImage(base64);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleSaveGift(e) {
+            e.preventDefault();
+            const id = document.getElementById('modal-gift-id').value;
+            const name = document.getElementById('modal-gift-name').value;
+            const category = document.getElementById('modal-gift-category').value;
+            const price = document.getElementById('modal-gift-price').value;
+            const image = document.getElementById('modal-gift-image').value || './assets/flask.png';
+            const desc = document.getElementById('modal-gift-desc').value;
+            const tagsStr = document.getElementById('modal-gift-tags').value;
+            const tags = tagsStr.split(/[,，]/).map(t => t.trim()).filter(Boolean);
+
+            if (id) {
+                GiftStorage.updateGift(id, { name, category, price, image, description: desc, tags });
+            } else {
+                GiftStorage.addGift({ name, category, price, image, description: desc, tags });
+            }
+
+            closeGiftModal();
+            renderCatalog();
+            initGiftSelectOptions();
+        }
+
+        function deleteGiftConfirm(id) {
+            if (confirm('确认删除此礼品项吗？')) {
+                GiftStorage.deleteGift(id);
+                renderCatalog();
+                initGiftSelectOptions();
+            }
+        }
+
+        // ==========================================
+        // 选礼清单抽屉 (Cart Drawer) 逻辑
+        // ==========================================
+        function openCartDrawer() {
+            renderCartDrawer();
+            document.getElementById('cart-drawer').classList.remove('hidden');
+            document.getElementById('cart-drawer').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeCartDrawer() {
+            document.getElementById('cart-drawer').classList.add('hidden');
+            document.getElementById('cart-drawer').classList.remove('flex');
+        }
+
+        function renderCartDrawer() {
+            const cart = GiftStorage.getCart();
+            const gifts = GiftStorage.getGifts();
+            const listContainer = document.getElementById('cart-items-list');
+            if (!listContainer) return;
+
+            const selectedGifts = gifts.filter(g => (cart[g.id] || 0) > 0);
+            const totalQty = selectedGifts.reduce((acc, g) => acc + cart[g.id], 0);
+
+            document.getElementById('cart-summary-kinds').innerText = `${selectedGifts.length} 款`;
+            document.getElementById('cart-summary-total-qty').innerText = `${totalQty} 件`;
+
+            if (selectedGifts.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="py-12 text-center text-slate-500">
+                        <i data-lucide="shopping-bag" class="w-10 h-10 mx-auto mb-2 opacity-30"></i>
+                        <p class="text-xs">暂未选择任何礼品，请在礼品库点击 + 添加</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            listContainer.innerHTML = selectedGifts.map(gift => {
+                const qty = cart[gift.id];
+                return `
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+                        <div class="flex items-center space-x-3 min-w-0">
+                            <img src="${gift.image}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-slate-700">
+                            <div class="min-w-0">
+                                <h4 class="text-xs font-bold text-white truncate">${gift.name}</h4>
+                                <p class="text-[11px] text-amber-400 font-semibold">${gift.price || '待定'}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1.5 flex-shrink-0">
+                            <button onclick="changeGiftQty('${gift.id}', -1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-xs">
+                                -
+                            </button>
+                            <span class="w-8 text-center text-xs font-bold text-white">${qty}</span>
+                            <button onclick="changeGiftQty('${gift.id}', 1)" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 text-xs">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function clearCartConfirm() {
+            if (confirm('确定要清空已选礼品清单吗？')) {
+                GiftStorage.clearCart();
+                renderCatalog();
+                renderCartDrawer();
+            }
+        }
+
+        function copyCartManifest() {
+            const cart = GiftStorage.getCart();
+            const gifts = GiftStorage.getGifts();
+            const selected = gifts.filter(g => (cart[g.id] || 0) > 0);
+            if (selected.length === 0) {
+                alert('当前未选中任何礼品！');
+                return;
+            }
+
+            let text = `【礼品采购与挑选清单汇总】\n----------------------------\n`;
+            let total = 0;
+            selected.forEach((g, idx) => {
+                const qty = cart[g.id];
+                total += qty;
+                text += `${idx + 1}. ${g.name} x ${qty}件 (单价: ${g.price})\n   分类: ${g.category}\n   描述: ${g.description}\n\n`;
+            });
+            text += `----------------------------\n共选择 ${selected.length} 款礼品，合计 ${total} 件。\n生成时间: ${new Date().toLocaleString()}`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('选礼清单已成功复制到剪贴板，可直接粘贴发送！');
+            }).catch(() => {
+                prompt('复制以下清单文本：', text);
+            });
+        }
+
+        function exportCartCSV() {
+            const cart = GiftStorage.getCart();
+            const gifts = GiftStorage.getGifts();
+            const selected = gifts.filter(g => (cart[g.id] || 0) > 0);
+            if (selected.length === 0) {
+                alert('清单为空，无法导出！');
+                return;
+            }
+
+            let csv = '\uFEFF礼品ID,礼品名称,分类,单价估值,选择数量,详细描述\n';
+            selected.forEach(g => {
+                csv += `"${g.id}","${g.name.replace(/"/g, '""')}","${g.category}","${g.price}","${cart[g.id]}","${g.description.replace(/"/g, '""')}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `礼品挑选清单_${Date.now()}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ==========================================
+        // 宣传图生成器逻辑 (Poster Studio)
+        // ==========================================
+        function initGiftSelectOptions() {
+            const sel = document.getElementById('poster-gift-select');
+            if (!sel) return;
+            const gifts = GiftStorage.getGifts();
+            sel.innerHTML = '<option value="">-- 选择已有礼品自动填充 --</option>' +
+                gifts.map(g => `<option value="${g.id}">${g.name} (${g.category})</option>`).join('');
+        }
+
+        function onSelectGiftForPoster(giftId) {
+            if (!giftId) return;
+            const gifts = GiftStorage.getGifts();
+            const gift = gifts.find(g => g.id === giftId);
+            if (!gift) return;
+
+            document.getElementById('poster-title').value = gift.name;
+            document.getElementById('poster-desc').value = gift.description;
+            document.getElementById('poster-tags').value = (gift.tags || []).join(', ');
+            document.getElementById('poster-price').value = gift.price || '¥ 299';
+            document.getElementById('poster-slogan').value = '臻选品质生活 · 传递温情心意';
+
+            if (gift.image) {
+                currentCustomImage = gift.image;
+                document.getElementById('poster-img-element').src = gift.image;
+                document.getElementById('poster-img-element').classList.remove('hidden');
+            }
+
+            generateAllPosters();
+        }
+
+        function quickGeneratePosterForGift(giftId) {
+            switchTab('poster');
+            const sel = document.getElementById('poster-gift-select');
+            if (sel) sel.value = giftId;
+            onSelectGiftForPoster(giftId);
+        }
+
+        function populateFormFromPreset() {
+            document.getElementById('poster-title').value = '宫廷金丝红茶尊享礼盒';
+            document.getElementById('poster-slogan').value = '匠心国韵 · 传世茶香';
+            document.getElementById('poster-tags').value = '国潮非遗, 经典节庆, 高端致礼';
+            document.getElementById('poster-desc').value = '精选武夷原产地金骏眉与正山小种，古法手工炒制，烫金雕花礼盒承载东方茶道风雅，心意典藏。';
+            document.getElementById('poster-price').value = '¥ 588';
+            document.getElementById('poster-cta').value = '尊享定制 ➔';
+            currentCustomImage = './assets/tea.png';
+            document.getElementById('poster-img-element').src = './assets/tea.png';
+            document.getElementById('poster-img-element').classList.remove('hidden');
+            generateAllPosters();
+        }
+
+        function setPosterAspectRatio(ratio) {
+            currentAspectRatio = ratio;
+            document.querySelectorAll('.ratio-btn').forEach(btn => {
+                btn.className = "ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700";
+            });
+            const activeBtn = document.getElementById(`ratio-btn-${ratio.replace(':', '-')}`);
+            if (activeBtn) {
+                activeBtn.className = "ratio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-rose-500 bg-rose-600 text-white text-center";
+            }
+            generateAllPosters();
+        }
+
+        function setPosterStyleFilter(style) {
+            currentStyleFilter = style;
+            document.querySelectorAll('.style-filter-btn').forEach(btn => {
+                btn.className = "style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-center hover:bg-slate-700";
+            });
+            const activeBtn = document.getElementById(`style-btn-${style}`);
+            if (activeBtn) {
+                activeBtn.className = "style-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-amber-500 bg-amber-600 text-slate-950 text-center font-bold";
+            }
+            renderPosterGallery();
+        }
+
+        function clearPosterImage() {
+            currentCustomImage = null;
+            document.getElementById('poster-img-element').classList.add('hidden');
+            generateAllPosters();
+        }
+
+        function handlePosterImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                currentCustomImage = evt.target.result;
+                const el = document.getElementById('poster-img-element');
+                el.src = currentCustomImage;
+                el.classList.remove('hidden');
+                generateAllPosters();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /**
+         * 批量生成海报 (商务多款 + 活力多款)
+         */
+        async function generateAllPosters() {
+            const container = document.getElementById('posters-gallery-container');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="col-span-full py-20 text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-400 border-t-transparent mb-3"></div>
+                    <p class="text-sm text-slate-400">正在生成超清设计宣传图，请稍候...</p>
+                </div>
+            `;
+
+            // 获取输入表单数据
+            const title = (document.getElementById('poster-title')?.value || '').trim() || '尊享礼品';
+            const slogan = (document.getElementById('poster-slogan')?.value || '').trim() || '品质之选 · 心意呈献';
+            const tagsStr = (document.getElementById('poster-tags')?.value || '').trim();
+            const tags = tagsStr.split(/[,，]/).map(t => t.trim()).filter(Boolean);
+            const desc = (document.getElementById('poster-desc')?.value || '').trim() || '高端甄选，尊贵献礼。';
+            const price = (document.getElementById('poster-price')?.value || '').trim() || '专享特惠';
+            const ctaText = (document.getElementById('poster-cta')?.value || '').trim();
+
+            const posterData = {
+                name: title,
+                slogan: slogan,
+                tags: tags,
+                description: desc,
+                price: price,
+                ctaText: ctaText,
+                image: currentCustomImage
+            };
+
+            activeRenderedCanvases = [];
+
+            // 遍历所有变体生成
+            for (const variant of POSTER_VARIANTS) {
+                const canvas = await PosterEngine.renderVariant(variant, posterData, {
+                    aspectRatio: currentAspectRatio
+                });
+                activeRenderedCanvases.push({
+                    variant,
+                    canvas,
+                    aspectRatio: currentAspectRatio,
+                    data: posterData
+                });
+            }
+
+            renderPosterGallery();
+        }
+
+        /**
+         * 渲染海报挑选画廊卡片
+         */
+        function renderPosterGallery() {
+            const container = document.getElementById('posters-gallery-container');
+            if (!container) return;
+
+            const filtered = activeRenderedCanvases.filter(item => {
+                if (currentStyleFilter === 'all') return true;
+                return item.variant.style === currentStyleFilter;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500">无此分类海报</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            filtered.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "glass-panel rounded-2xl overflow-hidden border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between group";
+
+                const isBiz = item.variant.style === 'business';
+                const styleBadgeClass = isBiz ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+
+                // 缩略预览容器
+                const previewContainer = document.createElement('div');
+                previewContainer.className = "relative p-4 flex items-center justify-center bg-slate-950/70 overflow-hidden cursor-pointer";
+                previewContainer.style.minHeight = "340px";
+                previewContainer.onclick = () => openPosterModal(index);
+
+                // 创建小预览 canvas
+                const previewCanvas = document.createElement('canvas');
+                const orig = item.canvas;
+                const scale = 360 / orig.width;
+                previewCanvas.width = 360;
+                previewCanvas.height = orig.height * scale;
+                const pctx = previewCanvas.getContext('2d');
+                pctx.drawImage(orig, 0, 0, previewCanvas.width, previewCanvas.height);
+                previewCanvas.className = "rounded-lg shadow-xl max-h-[360px] object-contain group-hover:scale-[1.02] transition-transform duration-300";
+                previewContainer.appendChild(previewCanvas);
+
+                // 悬浮放大查看角标
+                const hoverOverlay = document.createElement('div');
+                hoverOverlay.className = "absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none";
+                hoverOverlay.innerHTML = `<span class="px-3 py-1.5 rounded-xl bg-black/70 text-white text-xs font-semibold flex items-center gap-1.5 shadow"><i data-lucide="zoom-in" class="w-4 h-4"></i> 点击放大全屏检视</span>`;
+                previewContainer.appendChild(hoverOverlay);
+
+                // 卡片底部说明与下载动作
+                const footer = document.createElement('div');
+                footer.className = "p-4 border-t border-slate-800/80 flex items-center justify-between";
+                footer.innerHTML = `
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${styleBadgeClass}">
+                                ${item.variant.styleName}
+                            </span>
+                            <span class="text-xs font-bold text-white">${item.variant.name}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">${item.aspectRatio} · ${item.canvas.width}x${item.canvas.height}px</p>
+                    </div>
+                    <button class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        <span>下载</span>
+                    </button>
+                `;
+
+                // 绑定直接下载
+                footer.querySelector('button').onclick = (e) => {
+                    e.stopPropagation();
+                    const filename = `宣传图_${item.variant.styleName}_${item.variant.name}_${Date.now()}.png`;
+                    PosterEngine.downloadCanvas(item.canvas, filename);
+                };
+
+                card.appendChild(previewContainer);
+                card.appendChild(footer);
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // 海报大图全屏检视模态窗
+        // ==========================================
+        function openPosterModal(index) {
+            const item = activeRenderedCanvases[index];
+            if (!item) return;
+
+            document.getElementById('poster-modal-title').innerText = `${item.variant.styleName} · ${item.variant.name}`;
+            document.getElementById('poster-modal-subtitle').innerText = `尺寸比例: ${item.aspectRatio} (${item.canvas.width} × ${item.canvas.height} 像素 高清无损)`;
+
+            const modalCanvas = document.getElementById('poster-modal-canvas');
+            modalCanvas.width = item.canvas.width;
+            modalCanvas.height = item.canvas.height;
+            const ctx = modalCanvas.getContext('2d');
+            ctx.drawImage(item.canvas, 0, 0);
+
+            // 绑定下载按钮
+            const dlBtn = document.getElementById('poster-modal-download-btn');
+            dlBtn.onclick = () => {
+                const filename = `宣传图_${item.variant.styleName}_${item.variant.name}_${Date.now()}.png`;
+                PosterEngine.downloadCanvas(item.canvas, filename);
+            };
+
+            document.getElementById('poster-modal').classList.remove('hidden');
+            document.getElementById('poster-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closePosterModal() {
+            document.getElementById('poster-modal').classList.add('hidden');
+            document.getElementById('poster-modal').classList.remove('flex');
+        }
+
+        /**
+         * 打包一键下载全部变体海报为 ZIP 压缩包
+         */
+        async function downloadAllPostersAsZip() {
+            if (!activeRenderedCanvases || activeRenderedCanvases.length === 0) {
+                alert('暂无可下载的海报！');
+                return;
+            }
+
+            const btn = document.getElementById('btn-batch-download');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<div class="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-amber-400 border-t-transparent mr-1"></div><span>打包中...</span>`;
+            btn.disabled = true;
+
+            try {
+                const zip = new JSZip();
+                const folder = zip.folder("礼品宣传海报全套");
+
+                for (let i = 0; i < activeRenderedCanvases.length; i++) {
+                    const item = activeRenderedCanvases[i];
+                    const dataUrl = item.canvas.toDataURL('image/png', 0.95);
+                    const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
+                    const filename = `[${item.variant.styleName}]_${item.variant.name}_${item.aspectRatio.replace(':', '-')}_${i+1}.png`;
+                    folder.file(filename, base64Data, { base64: true });
+                }
+
+                const content = await zip.generateAsync({ type: "blob" });
+                const url = URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `礼品宣传图全套设计_${Date.now()}.zip`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('打包下载失败', err);
+                alert('打包下载出现错误，正在为您逐张保存...');
+                activeRenderedCanvases.forEach(item => {
+                    PosterEngine.downloadCanvas(item.canvas, `海报_${item.variant.name}.png`);
+                });
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        }
+    </script>
+</body>
+</html>
